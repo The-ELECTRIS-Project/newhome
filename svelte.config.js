@@ -9,7 +9,10 @@ const config = {
 	],
 
 	kit: {
-		adapter: auto()
+		adapter: auto(),
+		prerender: {
+        origin: 'http://localhost:4173'
+      }
 	}
 };
 

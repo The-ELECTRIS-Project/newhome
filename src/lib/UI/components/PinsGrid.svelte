@@ -14,14 +14,7 @@
   let editUrl = '';
   let editTitle = '';
 
-  function getPinSize(rows: number): number {
-    if (rows === 1) return 15;
-    if (rows === 2) return 12.5;
-    if (rows === 3) return 10.5;
-    return 12.5;
-  }
-
-  $: basePinSize = getPinSize(gridRows);
+  const basePinSize = 12.5;
 
   const hoverConfigs: HoverConfig[] = [
     {
@@ -42,22 +35,16 @@
     }
   }
 
+  $: {
+    if (browser) {
+      saveGridSettings();
+    }
+  }
+
   onMount(() => {
     if (browser) {
       loadGridSettings();
       loadPins();
-      
-      const handleGridSettingsChanged = (event: CustomEvent) => {
-        const { cols, rows } = event.detail;
-        gridCols = cols;
-        gridRows = rows;
-      };
-      
-      window.addEventListener('gridSettingsChanged', handleGridSettingsChanged as EventListener);
-      
-      return () => {
-        window.removeEventListener('gridSettingsChanged', handleGridSettingsChanged as EventListener);
-      };
     }
   });
 
@@ -101,15 +88,10 @@
     }
   }
 
-  function handleGridUpdate() {
-    if (browser) {
-      saveGridSettings();
-      savePins();
-    }
-  }
-
-  $: if (browser && (gridCols || gridRows)) {
-    handleGridUpdate();
+  export function updateGrid(cols: number, rows: number) {
+    gridCols = cols;
+    gridRows = rows;
+    savePins();
   }
 
   function extractDomain(url: string): string {
@@ -651,6 +633,9 @@
   }
 
   @media (max-width: 48vh) {
+    .section-title {
+      font-size: 1.4rem;
+    }
 
     .pins-grid {
       grid-template-columns: repeat(2, 1fr);

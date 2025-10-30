@@ -1,59 +1,7 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import { browser } from '$app/environment';
-
   let isMenuOpen = false;
   let isClosing = false;
   let buttonElement: HTMLButtonElement;
-  
-  let gridCols = 5;
-  let gridRows = 2;
-  
-  const MIN_COLS = 2;
-  const MAX_COLS = 8;
-  const MIN_ROWS = 1;
-  const MAX_ROWS = 3;
-
-  onMount(() => {
-    loadGridSettings();
-  });
-
-  function loadGridSettings() {
-    if (!browser) return;
-    
-    const savedCols = localStorage.getItem('newhome-grid-cols');
-    const savedRows = localStorage.getItem('newhome-grid-rows');
-    
-    if (savedCols) gridCols = parseInt(savedCols);
-    if (savedRows) gridRows = parseInt(savedRows);
-  }
-
-  function saveGridSettings() {
-    if (!browser) return;
-    
-    localStorage.setItem('newhome-grid-cols', gridCols.toString());
-    localStorage.setItem('newhome-grid-rows', gridRows.toString());
-    
-    window.dispatchEvent(new CustomEvent('gridSettingsChanged', {
-      detail: { cols: gridCols, rows: gridRows }
-    }));
-  }
-
-  function updateCols(delta: number) {
-    const newCols = gridCols + delta;
-    if (newCols >= MIN_COLS && newCols <= MAX_COLS) {
-      gridCols = newCols;
-      saveGridSettings();
-    }
-  }
-
-  function updateRows(delta: number) {
-    const newRows = gridRows + delta;
-    if (newRows >= MIN_ROWS && newRows <= MAX_ROWS) {
-      gridRows = newRows;
-      saveGridSettings();
-    }
-  }
 
   function toggleMenu() {
     if (isMenuOpen) {
@@ -116,59 +64,7 @@
           </button>
         </div>
         <div class="menu-body">
-          <div class="settings-section">
-            <h3 class="settings-title">Grid Layout</h3>
-            
-            <div class="setting-group">
-              <label class="setting-label">Columns ({MIN_COLS}-{MAX_COLS})</label>
-              <div class="setting-control">
-                <button 
-                  class="control-btn"
-                  on:click={() => updateCols(-1)}
-                  disabled={gridCols <= MIN_COLS}
-                  aria-label="Decrease columns"
-                >
-                  −
-                </button>
-                <span class="control-value">{gridCols}</span>
-                <button 
-                  class="control-btn"
-                  on:click={() => updateCols(1)}
-                  disabled={gridCols >= MAX_COLS}
-                  aria-label="Increase columns"
-                >
-                  +
-                </button>
-              </div>
-            </div>
-
-            <div class="setting-group">
-              <label class="setting-label">Rows ({MIN_ROWS}-{MAX_ROWS})</label>
-              <div class="setting-control">
-                <button 
-                  class="control-btn"
-                  on:click={() => updateRows(-1)}
-                  disabled={gridRows <= MIN_ROWS}
-                  aria-label="Decrease rows"
-                >
-                  −
-                </button>
-                <span class="control-value">{gridRows}</span>
-                <button 
-                  class="control-btn"
-                  on:click={() => updateRows(1)}
-                  disabled={gridRows >= MAX_ROWS}
-                  aria-label="Increase rows"
-                >
-                  +
-                </button>
-              </div>
-            </div>
-
-            <div class="grid-preview">
-              <span class="preview-label">Total pins: {gridCols * gridRows}</span>
-            </div>
-          </div>
+          <p class="placeholder-text">Customization options will be added here...</p>
         </div>
       </div>
     </div>
@@ -337,94 +233,12 @@
     overflow-y: auto;
   }
 
-  .settings-section {
-    max-width: 50vh;
-    margin: 0 auto;
-  }
-
-  .settings-title {
-    font-size: 2vh;
-    font-family: 'Letric', sans-serif;
-    color: hsl(20, 95%, 61%);
-    margin: 0 0 2vh 0;
+  .placeholder-text {
+    color: hsl(0, 0%, 60%);
+    font-size: 1.8vh;
     text-align: center;
-  }
-
-  .setting-group {
-    margin-bottom: 2.5vh;
-  }
-
-  .setting-label {
-    display: block;
-    font-size: 1.6vh;
-    color: hsl(0, 0%, 80%);
-    margin-bottom: 1vh;
-    font-family: 'Redwing', sans-serif;
-  }
-
-  .setting-control {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 2vh;
-  }
-
-  .control-btn {
-    width: 4vh;
-    height: 4vh;
-    background: hsl(240, 10%, 15%);
-    border: 0.1vh solid hsl(20, 95%, 51%);
-    border-radius: 0.8vh;
-    color: hsl(20, 95%, 61%);
-    font-size: 2.5vh;
-    font-weight: bold;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s ease;
-    font-family: 'Redwing', sans-serif;
-  }
-
-  .control-btn:hover:not(:disabled) {
-    background: hsl(20, 95%, 51%);
-    color: white;
-    transform: scale(1.05);
-    box-shadow: 0 0 1vh hsla(20, 95%, 51%, 0.4);
-  }
-
-  .control-btn:active:not(:disabled) {
-    transform: scale(0.95);
-  }
-
-  .control-btn:disabled {
-    opacity: 0.3;
-    cursor: not-allowed;
-    border-color: hsl(0, 0%, 30%);
-    color: hsl(0, 0%, 40%);
-  }
-
-  .control-value {
-    font-size: 2.2vh;
-    font-weight: 600;
-    color: hsl(20, 95%, 61%);
-    min-width: 4vh;
-    text-align: center;
-    font-family: 'Redwing', sans-serif;
-  }
-
-  .grid-preview {
-    margin-top: 2vh;
-    padding: 1.5vh;
-    background: hsl(240, 10%, 8%);
-    border: 0.1vh solid hsl(20, 95%, 51%);
-    border-radius: 0.8vh;
-    text-align: center;
-  }
-
-  .preview-label {
-    font-size: 1.6vh;
-    color: hsl(0, 0%, 70%);
+    margin: 0;
+    opacity: 0.7;
     font-family: 'Redwing', sans-serif;
   }
 
@@ -468,7 +282,7 @@
     }
   }
 
-  /* Mobile */
+  /* Mobile responsiveness */
   @media (max-width: 48vh) {
     .customize-button {
       width: 5vh;
