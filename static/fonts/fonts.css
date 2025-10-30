@@ -1,0 +1,83 @@
+@font-face {
+    font-family: 'Divine';
+    font-style: normal;
+    font-weight: 600;
+    src: url('/fonts/Divine/Divine.otf') format('opentype');
+}
+
+@font-face {
+    font-family: 'Letric';
+    font-style: normal;
+    font-weight: 400;
+    src: url('/fonts/Letric/Letric_Demo.otf') format('truetype');
+}
+
+@font-face {
+    font-family: 'Nightcore';
+    font-style: normal;
+    font-weight: 500;
+    src: url('/fonts/Nightcore/Nightcore.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'Redwing';
+    font-style: normal;
+    font-weight: 100;
+    src: url('/fonts/Redwing/Hairline.otf') format('opentype');
+}
+
+@font-face {
+    font-family: 'Redwing';
+    font-style: normal;
+    font-weight: 200;
+    src: url('/fonts/Redwing/Thin.otf') format('opentype');
+}
+
+@font-face {
+    font-family: 'Redwing';
+    font-style: normal;
+    font-weight: 300;
+    src: url('/fonts/Redwing/Light.otf') format('opentype');
+}
+
+@font-face {
+    font-family: 'Redwing';
+    font-style: normal;
+    font-weight: 400;
+    src: url('/fonts/Redwing/Regular.otf') format('opentype');
+}
+
+@font-face {
+    font-family: 'Redwing';
+    font-style: normal;
+    font-weight: 500;
+    src: url('/fonts/Redwing/Medium.otf') format('opentype');
+}
+
+@font-face {
+    font-family: 'Redwing';
+    font-style: normal;
+    font-weight: 700;
+    src: url('/fonts/Redwing/Bold.otf') format('opentype');
+}
+
+@font-face {
+    font-family: 'Redwing';
+    font-style: normal;
+    font-weight: 800;
+    src: url('/fonts/Redwing/Heavy.otf') format('opentype');
+}
+
+@font-face {
+    font-family: 'Redwing';
+    font-style: normal;
+    font-weight: 900;
+    src: url('/fonts/Redwing/Black.otf') format('opentype');
+}
+
+@font-face {
+    font-family: 'Tourner';
+    font-style: normal;
+    font-weight: 600;
+    src: url('/fonts/Tourner/Tourner.ttf') format('truetype');
+}

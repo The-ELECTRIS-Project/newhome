@@ -1,0 +1,5 @@
+# Our website is against all scraping, crawling, and data extraction.
+# But if you REALLY want to, I guess this file won't stop you.
+
+User-agent: *
+Disallow: /

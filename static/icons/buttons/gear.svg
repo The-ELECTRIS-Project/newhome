@@ -1,0 +1,61 @@
+<svg
+  width="500"
+  height="500"
+  viewBox="25 25 150 150"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <defs>
+    <mask id="gear-hole">
+      <rect width="200" height="200" fill="white"/>
+      <circle cx="100" cy="100" r="20" fill="black"/>
+    </mask>
+
+    <radialGradient id="orange-gear" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="hsl(22, 99%, 55%)"/>
+      <stop offset="100%" stop-color="hsl(22, 99%, 45%)"/>
+    </radialGradient>
+  </defs>
+
+  <g mask="url(#gear-hole)">
+    <g fill="url(#orange-gear)">
+      <g transform="rotate(0 100 100)">
+        <rect x="95" y="35" width="15" height="25" rx="2" />
+      </g>
+      <g transform="rotate(30 100 100)">
+        <rect x="95" y="35" width="15" height="25" rx="2" />
+      </g>
+      <g transform="rotate(60 100 100)">
+        <rect x="95" y="35" width="15" height="25" rx="2" />
+      </g>
+      <g transform="rotate(90 100 100)">
+        <rect x="95" y="35" width="15" height="25" rx="2" />
+      </g>
+      <g transform="rotate(120 100 100)">
+        <rect x="95" y="35" width="15" height="25" rx="2" />
+      </g>
+      <g transform="rotate(150 100 100)">
+        <rect x="95" y="35" width="15" height="25" rx="2" />
+      </g>
+      <g transform="rotate(180 100 100)">
+        <rect x="95" y="35" width="15" height="25" rx="2" />
+      </g>
+      <g transform="rotate(210 100 100)">
+        <rect x="95" y="35" width="15" height="25" rx="2" />
+      </g>
+      <g transform="rotate(240 100 100)">
+        <rect x="95" y="35" width="15" height="25" rx="2" />
+      </g>
+      <g transform="rotate(270 100 100)">
+        <rect x="95" y="35" width="15" height="25" rx="2" />
+      </g>
+      <g transform="rotate(300 100 100)">
+        <rect x="95" y="35" width="15" height="25" rx="2" />
+      </g>
+      <g transform="rotate(330 100 100)">
+        <rect x="95" y="35" width="15" height="25" rx="2" />
+      </g>
+    </g>
+    
+    <circle cx="100" cy="100" r="50" fill="url(#orange-gear)" />
+  </g>
+</svg>
