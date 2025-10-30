@@ -7,12 +7,8 @@ const config = {
 	preprocess: [
 		vitePreprocess()
 	],
-
 	kit: {
-		adapter: auto(),
-		prerender: {
-        origin: 'http://localhost:4173'
-      }
+		adapter: auto()
 	}
 };
 

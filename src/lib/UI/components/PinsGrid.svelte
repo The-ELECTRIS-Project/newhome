@@ -14,7 +14,14 @@
   let editUrl = '';
   let editTitle = '';
 
-  const basePinSize = 12.5;
+  function getPinSize(rows: number): number {
+    if (rows === 1) return 15;
+    if (rows === 2) return 12.5;
+    if (rows === 3) return 10.5;
+    return 12.5;
+  }
+
+  $: basePinSize = getPinSize(gridRows);
 
   const hoverConfigs: HoverConfig[] = [
     {
@@ -29,30 +36,48 @@
 
   $: totalPins = gridCols * gridRows;
   $: gridWidth = (gridCols * basePinSize) + ((gridCols - 1) * 1.6);
-  $: {
-    if (pins.length !== totalPins) {
-      updatePinsArray();
-    }
-  }
-
-  $: {
-    if (browser) {
-      saveGridSettings();
-    }
+  
+  $: if (browser && totalPins > 0) {
+    updatePinsArray();
   }
 
   onMount(() => {
     if (browser) {
       loadGridSettings();
-      loadPins();
+      
+      setTimeout(() => {
+        loadPins();
+      }, 0);
+      
+      const handleGridSettingsChanged = (event: CustomEvent) => {
+        const { cols, rows } = event.detail;
+        if (gridCols !== cols || gridRows !== rows) {
+          gridCols = cols;
+          gridRows = rows;
+          setTimeout(() => {
+            savePins();
+          }, 0);
+        }
+      };
+      
+      window.addEventListener('gridSettingsChanged', handleGridSettingsChanged as EventListener);
+      
+      return () => {
+        window.removeEventListener('gridSettingsChanged', handleGridSettingsChanged as EventListener);
+      };
     }
   });
 
   function updatePinsArray() {
+    // Prevent infinite loops by checking if update is actually needed
+    if (pins.length === totalPins) return;
+    
+    const currentPins = [...pins];
     const newPins = [];
+    
     for (let i = 0; i < totalPins; i++) {
-      if (i < pins.length && pins[i]) {
-        newPins[i] = pins[i];
+      if (i < currentPins.length && currentPins[i] && currentPins[i].url) {
+        newPins[i] = currentPins[i];
       } else {
         newPins[i] = { url: '', title: '', domain: '' };
       }
@@ -88,12 +113,6 @@
     }
   }
 
-  export function updateGrid(cols: number, rows: number) {
-    gridCols = cols;
-    gridRows = rows;
-    savePins();
-  }
-
   function extractDomain(url: string): string {
     if (!url) return '';
     try {
@@ -108,36 +127,48 @@
     if (!browser) return;
     
     const savedPins = localStorage.getItem('newhome-pins');
+    console.log('Loading pins, savedPins:', savedPins, 'totalPins:', totalPins);
+    
     if (savedPins) {
       try {
         const loadedPins = JSON.parse(savedPins);
-        pins = [];
+        const newPins = [];
+        
+        // Populate pins array based on current grid size
         for (let i = 0; i < totalPins; i++) {
-          if (i < loadedPins.length && loadedPins[i]) {
-            pins[i] = loadedPins[i];
+          if (i < loadedPins.length && loadedPins[i] && loadedPins[i].url) {
+            // Keep existing pin data
+            newPins[i] = loadedPins[i];
           } else {
-            pins[i] = { url: '', title: '', domain: '' };
+            // Empty slot
+            newPins[i] = { url: '', title: '', domain: '' };
           }
         }
+        
+        pins = newPins;
+        console.log('Pins loaded:', pins);
       } catch (e) {
         console.warn('Failed to load saved pins:', e);
         initializeDefaultPins();
       }
     } else {
+      console.log('No saved pins found, initializing defaults');
       initializeDefaultPins();
     }
   }
 
   function initializeDefaultPins() {
-    pins = [];
+    const newPins = [];
     for (let i = 0; i < totalPins; i++) {
-      pins[i] = { url: '', title: '', domain: '' };
+      newPins[i] = { url: '', title: '', domain: '' };
     }
-    pins[0] = {
+    newPins[0] = {
       url: 'https://electris.net',
       title: 'ELECTRIS',
       domain: 'electris.net'
     };
+    pins = newPins;
+    console.log('Default pins initialized:', pins);
     savePins();
   }
 
@@ -145,7 +176,9 @@
     if (!browser) return;
     
     try {
-      localStorage.setItem('newhome-pins', JSON.stringify(pins));
+      const pinsToSave = JSON.stringify(pins);
+      localStorage.setItem('newhome-pins', pinsToSave);
+      console.log('Pins saved:', pinsToSave);
     } catch (e) {
       console.warn('Failed to save pins:', e);
     }
@@ -187,6 +220,7 @@
       domain: processedUrl ? extractDomain(processedUrl) : ''
     };
     
+    // Force a save
     savePins();
     
     const pinCard = document.querySelector(`[data-pin-index="${editingPinIndex}"]`);
@@ -204,6 +238,7 @@
 
   function deletePin(index: number) {
     pins[index] = { url: '', title: '', domain: '' };
+    // Force a save
     savePins();
   }
 
@@ -633,10 +668,6 @@
   }
 
   @media (max-width: 48vh) {
-    .section-title {
-      font-size: 1.4rem;
-    }
-
     .pins-grid {
       grid-template-columns: repeat(2, 1fr);
       gap: 0.8rem;

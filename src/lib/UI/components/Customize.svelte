@@ -1,7 +1,66 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
+  import { browser } from '$app/environment';
+
   let isMenuOpen = false;
   let isClosing = false;
   let buttonElement: HTMLButtonElement;
+  
+  let gridCols = 5;
+  let gridRows = 2;
+  
+  const MIN_COLS = 2;
+  const MAX_COLS = 8;
+  const MIN_ROWS = 1;
+  const MAX_ROWS = 3;
+
+  onMount(() => {
+    loadGridSettings();
+  });
+
+  function loadGridSettings() {
+    if (!browser) return;
+    
+    const savedCols = localStorage.getItem('newhome-grid-cols');
+    const savedRows = localStorage.getItem('newhome-grid-rows');
+    
+    console.log('Customize: Loading grid settings:', savedCols, savedRows);
+    
+    if (savedCols) gridCols = parseInt(savedCols);
+    if (savedRows) gridRows = parseInt(savedRows);
+    
+    console.log('Customize: Grid settings loaded:', gridCols, gridRows);
+  }
+
+  function saveGridSettings() {
+    if (!browser) return;
+    
+    localStorage.setItem('newhome-grid-cols', gridCols.toString());
+    localStorage.setItem('newhome-grid-rows', gridRows.toString());
+    
+    console.log('Customize: Grid settings saved:', gridCols, gridRows);
+    
+    // Dispatch custom event to notify PinsGrid of changes
+    window.dispatchEvent(new CustomEvent('gridSettingsChanged', {
+      detail: { cols: gridCols, rows: gridRows }
+    }));
+  }
+
+  function updateCols(delta: number) {
+    const newCols = gridCols + delta;
+    if (newCols >= MIN_COLS && newCols <= MAX_COLS) {
+      gridCols = newCols;
+      saveGridSettings();
+    }
+  }
+
+  function updateRows(delta: number) {
+    const newRows = gridRows + delta;
+    if (newRows >= MIN_ROWS && newRows <= MAX_ROWS) {
+      gridRows = newRows;
+      saveGridSettings();
+    }
+  }
 
   function toggleMenu() {
     if (isMenuOpen) {
@@ -64,7 +123,63 @@
           </button>
         </div>
         <div class="menu-body">
-          <p class="placeholder-text">Customization options will be added here...</p>
+          <div class="settings-section">
+            <h3 class="settings-title">Grid Layout</h3>
+            
+            <div class="setting-group">
+              <div class="setting-row">
+                <label class="setting-label">Columns</label>
+                <div class="setting-control">
+                  <button 
+                    class="control-btn"
+                    on:click={() => updateCols(-1)}
+                    disabled={gridCols <= MIN_COLS}
+                    aria-label="Decrease columns"
+                  >
+                    −
+                  </button>
+                  <span class="control-value">{gridCols}</span>
+                  <button 
+                    class="control-btn"
+                    on:click={() => updateCols(1)}
+                    disabled={gridCols >= MAX_COLS}
+                    aria-label="Increase columns"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="setting-group">
+              <div class="setting-row">
+                <label class="setting-label">Rows</label>
+                <div class="setting-control">
+                  <button 
+                    class="control-btn"
+                    on:click={() => updateRows(-1)}
+                    disabled={gridRows <= MIN_ROWS}
+                    aria-label="Decrease rows"
+                  >
+                    −
+                  </button>
+                  <span class="control-value">{gridRows}</span>
+                  <button 
+                    class="control-btn"
+                    on:click={() => updateRows(1)}
+                    disabled={gridRows >= MAX_ROWS}
+                    aria-label="Increase rows"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="grid-info">
+              <span class="info-text">{gridCols * gridRows} pins total</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -233,12 +348,91 @@
     overflow-y: auto;
   }
 
-  .placeholder-text {
-    color: hsl(0, 0%, 60%);
+  .settings-section {
+    max-width: 100%;
+  }
+
+  .settings-title {
     font-size: 1.8vh;
+    font-family: 'Redwing', sans-serif;
+    color: hsl(0, 0%, 90%);
+    margin: 0 0 2.5vh 0;
+    font-weight: 500;
+  }
+
+  .setting-group {
+    margin-bottom: 1.8vh;
+  }
+
+  .setting-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .setting-label {
+    font-size: 1.5vh;
+    color: hsl(0, 0%, 70%);
+    font-family: 'Redwing', sans-serif;
+    font-weight: 400;
+  }
+
+  .setting-control {
+    display: flex;
+    align-items: center;
+    gap: 1.2vh;
+  }
+
+  .control-btn {
+    width: 3.2vh;
+    height: 3.2vh;
+    background: hsl(240, 10%, 15%);
+    border: 0.1vh solid hsl(0, 0%, 25%);
+    border-radius: 0.5vh;
+    color: hsl(0, 0%, 70%);
+    font-size: 2vh;
+    font-weight: normal;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+    font-family: 'Redwing', sans-serif;
+  }
+
+  .control-btn:hover:not(:disabled) {
+    background: hsl(240, 10%, 20%);
+    border-color: hsl(20, 95%, 51%);
+    color: hsl(20, 95%, 61%);
+  }
+
+  .control-btn:active:not(:disabled) {
+    transform: scale(0.95);
+  }
+
+  .control-btn:disabled {
+    opacity: 0.25;
+    cursor: not-allowed;
+  }
+
+  .control-value {
+    font-size: 1.6vh;
+    font-weight: 500;
+    color: hsl(0, 0%, 90%);
+    min-width: 3vh;
     text-align: center;
-    margin: 0;
-    opacity: 0.7;
+    font-family: 'Redwing', sans-serif;
+  }
+
+  .grid-info {
+    margin-top: 2.5vh;
+    padding-top: 1.5vh;
+    border-top: 0.1vh solid hsl(0, 0%, 20%);
+  }
+
+  .info-text {
+    font-size: 1.3vh;
+    color: hsl(0, 0%, 55%);
     font-family: 'Redwing', sans-serif;
   }
 
