@@ -2,12 +2,17 @@
   import { onMount } from 'svelte';
   import { t, currentLocale, initializeI18n } from '$lib/stores/i18n';
   import { useHoverConfig, type HoverConfig } from '$lib/stores/hoverConfig';
+  import { mods } from '$lib/stores/customization';
   import PinsGrid from '$lib/UI/components/PinsGrid.svelte';
   import Customize from '$lib/UI/components/Customize.svelte';
   import Search from '$lib/UI/components/Search.svelte';
   
   let currentTime = new Date();
   let i18nInitialized = false;
+
+  // Reactive variables for display toggles
+  $: showQuickPins = $mods.showQuickPins;
+  $: showSearchBar = $mods.showSearchBar;
 
   const hoverConfigs: HoverConfig[] = [
     {
@@ -28,6 +33,9 @@
   
   onMount(() => {
     (async () => {
+      // Initialize mods first
+      mods.init();
+      
       await initializeI18n();
       i18nInitialized = true;
     })();
@@ -107,7 +115,7 @@
 
 <svelte:head>
   <title>NewHome | ELECTRIS</title>
-  <meta name="description" content="ELECTRIS NewHome | A New Home for your browser" />
+  <meta name="description" content="A New Home for your browser" />
 </svelte:head>
 
 <div class="newhome-container">
@@ -129,13 +137,18 @@
     </div>
   </div>
 
-  <Search/>
+  {#if showSearchBar}
+    <Search/>
+  {/if}
   
-  <h2 class="section-title">
-    {$t('newhome.pins.title', 'Quick Pins')}
-  </h2>
+  {#if showQuickPins}
+    <h2 class="section-title">
+      {$t('newhome.pins.title', 'Quick Pins')}
+    </h2>
 
-  <PinsGrid/>
+    <PinsGrid/>
+  {/if}
+  
   <Customize/>
 </div>
 

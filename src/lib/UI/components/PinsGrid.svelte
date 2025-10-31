@@ -3,11 +3,13 @@
   import { t, currentLocale } from '$lib/stores/i18n';
   import { browser } from '$app/environment';
   import { useHoverConfig, type HoverConfig } from '$lib/stores/hoverConfig';
+  import { mods } from '$lib/stores/customization';
 
   $: isPageArabic = $currentLocale === 'ar';
+  $: gridCols = $mods.gridCols;
+  $: gridRows = $mods.gridRows;
+  $: openLinksInNewTabs = $mods.openLinksInNewTabs;
 
-  let gridCols = 5;
-  let gridRows = 2;
   let pins: Array<{ url: string; title: string; domain: string }> = [];
 
   let editingPinIndex = -1;
@@ -43,33 +45,31 @@
 
   onMount(() => {
     if (browser) {
-      loadGridSettings();
+      // Initialize mods first
+      mods.init();
       
       setTimeout(() => {
         loadPins();
       }, 0);
       
-      const handleGridSettingsChanged = (event: CustomEvent) => {
-        const { cols, rows } = event.detail;
-        if (gridCols !== cols || gridRows !== rows) {
-          gridCols = cols;
-          gridRows = rows;
+      const handleModsChanged = (event: CustomEvent) => {
+        const config = event.detail;
+        if (gridCols !== config.gridCols || gridRows !== config.gridRows) {
           setTimeout(() => {
             savePins();
           }, 0);
         }
       };
       
-      window.addEventListener('gridSettingsChanged', handleGridSettingsChanged as EventListener);
+      window.addEventListener('modsChanged', handleModsChanged as EventListener);
       
       return () => {
-        window.removeEventListener('gridSettingsChanged', handleGridSettingsChanged as EventListener);
+        window.removeEventListener('modsChanged', handleModsChanged as EventListener);
       };
     }
   });
 
   function updatePinsArray() {
-    // Prevent infinite loops by checking if update is actually needed
     if (pins.length === totalPins) return;
     
     const currentPins = [...pins];
@@ -83,34 +83,6 @@
       }
     }
     pins = newPins;
-  }
-
-  function loadGridSettings() {
-    if (!browser) return;
-    
-    const savedCols = localStorage.getItem('newhome-grid-cols');
-    const savedRows = localStorage.getItem('newhome-grid-rows');
-    
-    if (savedCols) {
-      const cols = parseInt(savedCols);
-      gridCols = cols;
-    }
-    
-    if (savedRows) {
-      const rows = parseInt(savedRows);
-      gridRows = rows;
-    }
-  }
-
-  function saveGridSettings() {
-    if (!browser) return;
-    
-    try {
-      localStorage.setItem('newhome-grid-cols', gridCols.toString());
-      localStorage.setItem('newhome-grid-rows', gridRows.toString());
-    } catch (e) {
-      console.warn('Failed to save grid settings:', e);
-    }
   }
 
   function extractDomain(url: string): string {
@@ -127,32 +99,26 @@
     if (!browser) return;
     
     const savedPins = localStorage.getItem('newhome-pins');
-    console.log('Loading pins, savedPins:', savedPins, 'totalPins:', totalPins);
     
     if (savedPins) {
       try {
         const loadedPins = JSON.parse(savedPins);
         const newPins = [];
         
-        // Populate pins array based on current grid size
         for (let i = 0; i < totalPins; i++) {
           if (i < loadedPins.length && loadedPins[i] && loadedPins[i].url) {
-            // Keep existing pin data
             newPins[i] = loadedPins[i];
           } else {
-            // Empty slot
             newPins[i] = { url: '', title: '', domain: '' };
           }
         }
         
         pins = newPins;
-        console.log('Pins loaded:', pins);
       } catch (e) {
         console.warn('Failed to load saved pins:', e);
         initializeDefaultPins();
       }
     } else {
-      console.log('No saved pins found, initializing defaults');
       initializeDefaultPins();
     }
   }
@@ -168,7 +134,6 @@
       domain: 'electris.net'
     };
     pins = newPins;
-    console.log('Default pins initialized:', pins);
     savePins();
   }
 
@@ -178,7 +143,6 @@
     try {
       const pinsToSave = JSON.stringify(pins);
       localStorage.setItem('newhome-pins', pinsToSave);
-      console.log('Pins saved:', pinsToSave);
     } catch (e) {
       console.warn('Failed to save pins:', e);
     }
@@ -220,7 +184,6 @@
       domain: processedUrl ? extractDomain(processedUrl) : ''
     };
     
-    // Force a save
     savePins();
     
     const pinCard = document.querySelector(`[data-pin-index="${editingPinIndex}"]`);
@@ -238,7 +201,6 @@
 
   function deletePin(index: number) {
     pins[index] = { url: '', title: '', domain: '' };
-    // Force a save
     savePins();
   }
 
@@ -302,8 +264,8 @@
           <a 
             href={pin.url}
             class="pin-link"
-            target="_blank"
-            rel="noopener noreferrer"
+            target={openLinksInNewTabs ? "_blank" : "_self"}
+            rel={openLinksInNewTabs ? "noopener noreferrer" : undefined}
           >
             <div class="pin-favicon">
               <img 

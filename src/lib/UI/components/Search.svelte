@@ -1,12 +1,15 @@
 <script lang="ts">
   import { t } from '$lib/stores/i18n';
   import { useHoverConfig, type HoverConfig } from '$lib/stores/hoverConfig';
+  import { mods } from '$lib/stores/customization';
 
   let searchQuery = '';
   let searchInput: HTMLInputElement;
   let suggestions: string[] = [];
   let selectedSuggestion = -1;
   let searchTimeoutId: ReturnType<typeof setTimeout> | undefined;
+
+  $: openLinksInNewTabs = $mods.openLinksInNewTabs;
 
   const hoverConfigs: HoverConfig[] = [
     {
@@ -25,7 +28,7 @@
     const form = document.createElement('form');
     form.method = 'POST';
     form.action = 'https://searxng.electris.net/search';
-    form.target = '_blank';
+    form.target = openLinksInNewTabs ? '_blank' : '_self';
     form.style.display = 'none';
     
     const input = document.createElement('input');

@@ -1,65 +1,56 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { browser } from '$app/environment';
+  import { mods } from '$lib/stores/customization';
 
   let isMenuOpen = false;
   let isClosing = false;
   let buttonElement: HTMLButtonElement;
   
-  let gridCols = 5;
-  let gridRows = 2;
+  let gridCols = $mods.gridCols;
+  let gridRows = $mods.gridRows;
+  let openLinksInNewTabs = $mods.openLinksInNewTabs;
+  let showQuickPins = $mods.showQuickPins;
+  let showSearchBar = $mods.showSearchBar;
   
   const MIN_COLS = 2;
   const MAX_COLS = 8;
   const MIN_ROWS = 1;
   const MAX_ROWS = 3;
 
+  $: gridCols = $mods.gridCols;
+  $: gridRows = $mods.gridRows;
+  $: openLinksInNewTabs = $mods.openLinksInNewTabs;
+  $: showQuickPins = $mods.showQuickPins;
+  $: showSearchBar = $mods.showSearchBar;
+
   onMount(() => {
-    loadGridSettings();
+    mods.init();
   });
-
-  function loadGridSettings() {
-    if (!browser) return;
-    
-    const savedCols = localStorage.getItem('newhome-grid-cols');
-    const savedRows = localStorage.getItem('newhome-grid-rows');
-    
-    console.log('Customize: Loading grid settings:', savedCols, savedRows);
-    
-    if (savedCols) gridCols = parseInt(savedCols);
-    if (savedRows) gridRows = parseInt(savedRows);
-    
-    console.log('Customize: Grid settings loaded:', gridCols, gridRows);
-  }
-
-  function saveGridSettings() {
-    if (!browser) return;
-    
-    localStorage.setItem('newhome-grid-cols', gridCols.toString());
-    localStorage.setItem('newhome-grid-rows', gridRows.toString());
-    
-    console.log('Customize: Grid settings saved:', gridCols, gridRows);
-    
-    // Dispatch custom event to notify PinsGrid of changes
-    window.dispatchEvent(new CustomEvent('gridSettingsChanged', {
-      detail: { cols: gridCols, rows: gridRows }
-    }));
-  }
 
   function updateCols(delta: number) {
     const newCols = gridCols + delta;
     if (newCols >= MIN_COLS && newCols <= MAX_COLS) {
-      gridCols = newCols;
-      saveGridSettings();
+      mods.updateSetting('gridCols', newCols);
     }
   }
 
   function updateRows(delta: number) {
     const newRows = gridRows + delta;
     if (newRows >= MIN_ROWS && newRows <= MAX_ROWS) {
-      gridRows = newRows;
-      saveGridSettings();
+      mods.updateSetting('gridRows', newRows);
     }
+  }
+
+  function toggleLinksInNewTabs() {
+    mods.updateSetting('openLinksInNewTabs', !openLinksInNewTabs);
+  }
+
+  function toggleQuickPins() {
+    mods.updateSetting('showQuickPins', !showQuickPins);
+  }
+
+  function toggleSearchBar() {
+    mods.updateSetting('showSearchBar', !showSearchBar);
   }
 
   function toggleMenu() {
@@ -124,62 +115,110 @@
         </div>
         <div class="menu-body">
           <div class="settings-section">
-            <h3 class="settings-title">Grid Layout</h3>
+            <h3 class="settings-title">Display Options</h3>
             
             <div class="setting-group">
               <div class="setting-row">
-                <label class="setting-label">Columns</label>
-                <div class="setting-control">
-                  <button 
-                    class="control-btn"
-                    on:click={() => updateCols(-1)}
-                    disabled={gridCols <= MIN_COLS}
-                    aria-label="Decrease columns"
-                  >
-                    −
-                  </button>
-                  <span class="control-value">{gridCols}</span>
-                  <button 
-                    class="control-btn"
-                    on:click={() => updateCols(1)}
-                    disabled={gridCols >= MAX_COLS}
-                    aria-label="Increase columns"
-                  >
-                    +
-                  </button>
-                </div>
+                <label class="setting-label">Open Links in New Tabs</label>
+                <button 
+                  class="toggle-switch" 
+                  class:active={openLinksInNewTabs}
+                  on:click={toggleLinksInNewTabs}
+                  aria-label="Toggle open links in new tabs"
+                >
+                  <span class="toggle-slider"></span>
+                </button>
               </div>
             </div>
 
             <div class="setting-group">
               <div class="setting-row">
-                <label class="setting-label">Rows</label>
-                <div class="setting-control">
-                  <button 
-                    class="control-btn"
-                    on:click={() => updateRows(-1)}
-                    disabled={gridRows <= MIN_ROWS}
-                    aria-label="Decrease rows"
-                  >
-                    −
-                  </button>
-                  <span class="control-value">{gridRows}</span>
-                  <button 
-                    class="control-btn"
-                    on:click={() => updateRows(1)}
-                    disabled={gridRows >= MAX_ROWS}
-                    aria-label="Increase rows"
-                  >
-                    +
-                  </button>
-                </div>
+                <label class="setting-label">Show Quick Pins</label>
+                <button 
+                  class="toggle-switch" 
+                  class:active={showQuickPins}
+                  on:click={toggleQuickPins}
+                  aria-label="Toggle quick pins visibility"
+                >
+                  <span class="toggle-slider"></span>
+                </button>
               </div>
             </div>
 
-            <div class="grid-info">
-              <span class="info-text">{gridCols * gridRows} pins total</span>
+            <div class="setting-group">
+              <div class="setting-row">
+                <label class="setting-label">Show Search Bar</label>
+                <button 
+                  class="toggle-switch" 
+                  class:active={showSearchBar}
+                  on:click={toggleSearchBar}
+                  aria-label="Toggle search bar visibility"
+                >
+                  <span class="toggle-slider"></span>
+                </button>
+              </div>
             </div>
           </div>
+
+          {#if showQuickPins}
+            <div class="settings-section">
+              <h3 class="settings-title">Grid Layout</h3>
+              
+              <div class="setting-group">
+                <div class="setting-row">
+                  <label class="setting-label">Columns</label>
+                  <div class="setting-control">
+                    <button 
+                      class="control-btn"
+                      on:click={() => updateCols(-1)}
+                      disabled={gridCols <= MIN_COLS}
+                      aria-label="Decrease columns"
+                    >
+                      −
+                    </button>
+                    <span class="control-value">{gridCols}</span>
+                    <button 
+                      class="control-btn"
+                      on:click={() => updateCols(1)}
+                      disabled={gridCols >= MAX_COLS}
+                      aria-label="Increase columns"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="setting-group">
+                <div class="setting-row">
+                  <label class="setting-label">Rows</label>
+                  <div class="setting-control">
+                    <button 
+                      class="control-btn"
+                      on:click={() => updateRows(-1)}
+                      disabled={gridRows <= MIN_ROWS}
+                      aria-label="Decrease rows"
+                    >
+                      −
+                    </button>
+                    <span class="control-value">{gridRows}</span>
+                    <button 
+                      class="control-btn"
+                      on:click={() => updateRows(1)}
+                      disabled={gridRows >= MAX_ROWS}
+                      aria-label="Increase rows"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="grid-info">
+                <span class="info-text">{gridCols * gridRows} pins total</span>
+              </div>
+            </div>
+          {/if}
         </div>
       </div>
     </div>
@@ -286,7 +325,7 @@
   .menu-content {
     width: 60vw;
     max-width: 80vh;
-    height: 60vh;
+    max-height: 80vh;
     background: hsl(240, 10%, 10%);
     border: 0.2vh solid hsl(20, 95%, 51%);
     border-radius: 2vh;
@@ -350,6 +389,11 @@
 
   .settings-section {
     max-width: 100%;
+    margin-bottom: 3vh;
+  }
+
+  .settings-section:last-child {
+    margin-bottom: 0;
   }
 
   .settings-title {
@@ -436,6 +480,74 @@
     font-family: 'Redwing', sans-serif;
   }
 
+  .toggle-switch {
+    position: relative;
+    width: 5vh;
+    height: 2.6vh;
+    background: hsl(240, 10%, 15%);
+    border: 0.1vh solid hsl(0, 0%, 25%);
+    border-radius: 1.3vh;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+  }
+
+  .toggle-switch::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      135deg,
+      transparent 0%,
+      hsla(20, 95%, 51%, 0.1) 50%,
+      transparent 100%
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .toggle-switch:hover::before {
+    opacity: 1;
+  }
+
+  .toggle-switch.active {
+    background: hsl(20, 95%, 51%);
+    border-color: hsl(20, 95%, 61%);
+    box-shadow: 
+      0 0 1vh hsla(20, 95%, 51%, 0.4),
+      inset 0 0.1vh 0.2vh hsla(0, 0%, 100%, 0.2);
+  }
+
+  .toggle-slider {
+    position: absolute;
+    top: 0.3vh;
+    left: 0.3vh;
+    width: 2vh;
+    height: 2vh;
+    background: hsl(0, 0%, 70%);
+    border-radius: 50%;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 0.2vh 0.4vh hsla(0, 0%, 0%, 0.3);
+  }
+
+  .toggle-switch.active .toggle-slider {
+    transform: translateX(2.4vh);
+    background: hsl(0, 0%, 100%);
+    box-shadow: 
+      0 0.2vh 0.6vh hsla(0, 0%, 0%, 0.4),
+      0 0 0.8vh hsla(20, 95%, 51%, 0.6);
+  }
+
+  .toggle-switch:hover .toggle-slider {
+    box-shadow: 0 0.3vh 0.6vh hsla(0, 0%, 0%, 0.4);
+  }
+
+  .toggle-switch.active:hover .toggle-slider {
+    box-shadow: 
+      0 0.3vh 0.8vh hsla(0, 0%, 0%, 0.5),
+      0 0 1.2vh hsla(20, 95%, 51%, 0.8);
+  }
+
   @keyframes fadeIn {
     from {
       opacity: 0;
@@ -476,7 +588,7 @@
     }
   }
 
-  /* Mobile responsiveness */
+  /* Mobile */
   @media (max-width: 48vh) {
     .customize-button {
       width: 5vh;
@@ -506,6 +618,20 @@
 
     .menu-header h2 {
       font-size: 3vh;
+    }
+
+    .toggle-switch {
+      width: 6vh;
+      height: 3vh;
+    }
+
+    .toggle-slider {
+      width: 2.4vh;
+      height: 2.4vh;
+    }
+
+    .toggle-switch.active .toggle-slider {
+      transform: translateX(3vh);
     }
   }
 
