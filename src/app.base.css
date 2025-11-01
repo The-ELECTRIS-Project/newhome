@@ -135,7 +135,7 @@ a {
 }
 
 .circle.hovered-pin {
-  --circle-size: 13.4vh;
+  --circle-size: var(--hover-pin-size);
   top: -0.03vh;
   border-radius: 1.2vh;
 }

@@ -24,6 +24,11 @@
   }
 
   $: basePinSize = getPinSize(gridRows);
+  $: hoverPinSize = basePinSize + 0.9;
+
+  $: if (browser) {
+    document.documentElement.style.setProperty('--hover-pin-size', `${hoverPinSize}vh`);
+  }
 
   const hoverConfigs: HoverConfig[] = [
     {
