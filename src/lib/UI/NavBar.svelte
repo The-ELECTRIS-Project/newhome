@@ -1185,21 +1185,21 @@
     color: white;
   }
 
-  :global([data-theme="light"]) .theme-dropdown,
-  :global([data-theme="light"]) .color-scheme-dropdown {
+  :global([data-color-scheme="light"]) .theme-dropdown,
+  :global([data-color-scheme="light"]) .color-scheme-dropdown {
     background: var(--bg-secondary, #f0f0f0);
     color: #333;
   }
 
-  :global([data-theme="light"]) .theme-button,
-  :global([data-theme="light"]) .theme-option,
-  :global([data-theme="light"]) .color-scheme-button,
-  :global([data-theme="light"]) .color-scheme-option {
+  :global([data-color-scheme="light"]) .theme-button,
+  :global([data-color-scheme="light"]) .theme-option,
+  :global([data-color-scheme="light"]) .color-scheme-button,
+  :global([data-color-scheme="light"]) .color-scheme-option {
     color: #f65901;
   }
 
-  :global([data-theme="light"]) .theme-description,
-  :global([data-theme="light"]) .color-scheme-description {
+  :global([data-color-scheme="light"]) .theme-description,
+  :global([data-color-scheme="light"]) .color-scheme-description {
     color: rgba(246, 89, 1, 0.6);
   }
 </style>

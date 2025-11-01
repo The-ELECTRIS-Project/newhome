@@ -160,7 +160,7 @@
             </div>
           </div>
 
-          {#if showQuickPins}
+          {#if $mods.showQuickPins}
             <div class="settings-section">
               <h3 class="settings-title">Grid Layout</h3>
               

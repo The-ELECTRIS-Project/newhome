@@ -12,7 +12,7 @@ export interface ModsConfig {
 const DEFAULT_MODS: ModsConfig = {
   gridCols: 5,
   gridRows: 2,
-  openLinksInNewTabs: true,
+  openLinksInNewTabs: false,
   showQuickPins: true,
   showSearchBar: true
 };
